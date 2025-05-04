@@ -14,11 +14,15 @@ if uploaded_file is not None:
     results = []
 
     for idx, row in df.iterrows():
-        total_marks = row['Total Marks']
-        
+        # Safely convert 'Total Marks' to int, handle invalid/missing cases
+        try:
+            total_marks = int(row['Total Marks'])
+        except (ValueError, TypeError):
+            total_marks = 0  # You can choose to skip rows instead of setting to 0
+
         # Part A: distribute randomly but ensure sum <= total_marks and each <= 2
         part_a = [0] * 5
-        remaining_a = min(total_marks, 10)  # max 10 total for Part A if marks >=10
+        remaining_a = min(total_marks, 10)  # Max 10 total across 5 questions (2 per question)
 
         while remaining_a > 0:
             available = [i for i in range(5) if part_a[i] < 2]
@@ -66,7 +70,7 @@ if uploaded_file is not None:
     result_df = pd.DataFrame(results)
     st.dataframe(result_df)
 
-    # Function to convert to Excel
+    # Function to convert DataFrame to Excel in-memory
     def convert_df_to_excel(df):
         output = BytesIO()
         with pd.ExcelWriter(output, engine='openpyxl') as writer:
